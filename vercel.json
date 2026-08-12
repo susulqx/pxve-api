@@ -1,6 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "nodeVersion": "20.x",
   "functions": {
     "src/app.ts": {
       "maxDuration": 300,

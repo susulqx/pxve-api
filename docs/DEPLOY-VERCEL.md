@@ -22,11 +22,13 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "src/app.ts": { "runtime": "nodejs20.x", "maxDuration": 300, "memory": 2048 }
+    "src/app.ts": { "maxDuration": 300, "memory": 2048 }
   }
 }
 ```
 
+> - ⚠️ `functions.runtime` 只接受运行时包标识（如 `@vercel/node@3.x`），**不要写 `nodejs20.x`**（会报 "Function Runtimes must have a valid version"）；`nodeVersion` 也不是 vercel.json 的字段（会报 "should NOT have additional property"）。
+> - **Node 版本在 Dashboard → Project → Settings → General → Node.js Version 里选择（建议 20.x 或 22.x）**，不写在配置文件中。
 > - `maxDuration`：Hobby 上限 300s（ugoira 转码/长文翻译预留）；Pro 可 800s。
 > - 若本机 ffmpeg 未装导致 ugoira 失败：部署前安装 `ffmpeg-static` 并把 `src/services/ugoira.ts` 的 `execFile('ffmpeg', …)` 改为 `execFile(ffmpegPath, …)`（ffmpeg-static 导出二进制路径），bundle 会增大约 76MB（Vercel 250MB 限内）。
 

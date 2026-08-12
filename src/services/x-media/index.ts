@@ -1,4 +1,4 @@
-import { join } from '@std/path'
+import { join } from 'node:path'
 
 const fetch_x_media_py = join(import.meta.dirname!, 'fetch_x_media.py')
 export async function runFetchXMediaCmd(userName?: string, userId?: string, nextCursor?: string) {

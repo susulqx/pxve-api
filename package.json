@@ -1,0 +1,44 @@
+{
+  "name": "pxve-api",
+  "version": "1.0.0",
+  "description": "A program that implements easy-to-use APIs for Pixiv-related websites, intended for use with the Pixiv Viewer. Node.js port (Vercel-ready).",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "dev": "tsx watch src/local-server.ts",
+    "start": "tsx src/local-server.ts",
+    "type-check": "tsc --noEmit",
+    "build": "esbuild src/app.ts --bundle --platform=node --format=esm --outfile=dist/app.mjs --log-level=warning",
+    "lint": "deno lint"
+  },
+  "dependencies": {
+    "@__dirname/pixiv-web-api": "0.1.4",
+    "@hono/node-server": "^1.13.7",
+    "@hono/swagger-ui": "^0.5.3",
+    "@scalar/hono-api-reference": "^0.9.34",
+    "await-lock": "^2.2.2",
+    "cheerio": "^1.1.2",
+    "cookie": "^1.1.1",
+    "crypto-js": "^4.2.0",
+    "dayjs": "^1.11.19",
+    "google-translate-api-x": "^10.7.2",
+    "hono": "^4.12.2",
+    "hono-zod-openapi": "^1.0.1",
+    "isbot": "^5.1.32",
+    "microsoft-translate-api": "^1.1.0",
+    "qs": "^6.14.2",
+    "sharp": "^0.34.5",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "^22.10.0",
+    "@types/qs": "^6.15.1",
+    "esbuild": "^0.24.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}

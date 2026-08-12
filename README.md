@@ -1,0 +1,207 @@
+# Pxve API
+
+[![Deno](https://img.shields.io/badge/Deno-2-blue.svg)](https://deno.land/)
+[![Hono](https://img.shields.io/badge/Hono-E36002.svg?style=flat&logo=Hono&logoColor=white)](https://hono.dev/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+中文 | [English](./README.en.md)
+
+一个实现了 Pixiv 相关站点的易用化 API 的程序，供 [Pixiv Viewer](https://github.com/asadahimeka/pixiv-viewer) 使用。
+
+Demo: [api.pxve.cc](https://api.pxve.cc)
+
+API 文档：[api.pxve.cc/docs](https://api.pxve.cc/docs)
+
+## ✨ 特性
+
+- 🎨 **Pixiv API** - 支持 Pixiv App API 和 Web API
+- 🔌 **HibiAPI 兼容** - Pixiv 部分与 [HibiAPI](https://github.com/mixmoe/HibiAPI) 格式兼容
+- 🎬 **动图处理** - Ugoira 动图转换
+- 📚 **小说翻译** - Pixiv 小说翻译支持
+- 🖼️ **图片处理** - WebP 转换、图片代理
+- 🔍 **以图搜图** - 集成 SauceNAO API
+- 🔐 **安全防护** - 请求限流、域名白名单、UA 黑名单
+- 📖 **API 文档** - 集成 Swagger UI 和 Scalar 文档
+- 🐳 **Docker 支持** - 提供 Docker 部署方案
+
+## 🚀 快速开始
+
+### 环境要求
+
+Deno 2.x
+
+### 安装运行
+
+1. **克隆项目**
+```bash
+git clone https://github.com/asadahimeka/pxve-api.git
+cd pxve-api
+```
+
+2. **配置环境变量**
+```bash
+cp .env.example .env
+# 编辑 .env 文件，填入必要的配置
+```
+
+3. **开发模式运行**
+```bash
+deno task dev
+```
+
+4. **生产模式运行**
+```bash
+deno task start
+```
+
+### Docker 部署
+
+```bash
+# 构建镜像
+docker build -t pxve-api .
+
+# 运行容器
+docker run -d -p 3021:3021 --env-file .env pxve-api
+```
+
+## 📝 配置说明
+
+### 基础配置
+
+| 环境变量 | 说明 | 默认值 |
+|---------|------|--------|
+| `PORT` | 服务监听端口 | `3021` |
+| `ENABLE_CACHE` | 是否启用 GET 请求缓存 (1/0) | `0` |
+
+### 安全配置
+
+| 环境变量 | 说明 |
+|---------|------|
+| `ACCEPT_DOMAINS` | 请求来源域名白名单（逗号分隔） |
+| `UA_BLACKLIST` | User-Agent 黑名单（逗号分隔） |
+
+### Pixiv 配置
+
+> 获取 RefreshToken 参考教程：https://www.nanoka.top/posts/e78ef86/
+
+| 环境变量 | 说明 | 必需 |
+|---------|------|------|
+| `PIXIV_COOKIE` | Pixiv Web API Cookie | 推荐 |
+| `PIXIV_ACCOUNT_TOKEN` | Pixiv App API Refresh Token | 推荐 |
+| `PIXIV_ACCOUNT_TOKEN_ALTS` | 备用 Refresh Tokens（逗号分隔） | 可选 |
+
+### 第三方服务配置
+
+| 环境变量 | 说明 | 用途 |
+|---------|------|------|
+| `HIBIAPI_BASE` | 备用 HibiAPI 服务域名 | API 转发 |
+| `SAUCENAO_API_KEY` | SauceNAO API Key | 以图搜图 |
+| `SILICONClOUD_APT_KEY` | 硅基流动 API Key | 小说翻译 |
+
+## 📚 API 文档
+
+启动服务后，可以通过以下地址访问 API 文档：
+
+- **Scalar 文档（推荐）**: http://localhost:3021/docs
+- **Swagger UI**: http://localhost:3021/swagger
+- **HibiAPI 兼容文档**: http://localhost:3021/docs/hibiapi
+
+## 🔗 API 端点
+
+### Pixiv 相关
+
+- `GET /api/pixiv/*` - Pixiv APP API
+- `GET /api/pixivision` - Pixivision API
+- `GET /api/pixiv-now/http` - Pixiv Web API
+- `GET /api/pixiv-novel-translate` - 小说翻译
+- `GET /pid` - 通过 PID 查找 pixiv 图片
+- `GET /api/pid-recover` - 通过 PID 查找 pixiv 图片镜像
+
+### 媒体处理
+
+- `GET /api/ugoira` - Ugoira 动图处理
+- `GET /api/webp` - WebP 转换
+- `GET /pximg` - pximg 图片代理
+
+### 第三方集成
+
+- `GET /api/sauce/` - 以图搜图
+- `GET /api/ai-image-detect` - AI 图像检测
+- `GET /api/x/media` - 获取 X 用户媒体推文，详见[参考文档](./src/services/x-media/README.md)
+
+### 其他接口
+
+- `GET /proxy/*` - CORS 代理
+- HibiAPI 兼容接口
+
+## 🛠️ 开发命令
+
+```bash
+# 开发模式（热重载）
+deno task dev
+
+# 生产模式
+deno task start
+
+# 类型检查
+deno task type-check
+
+# 代码格式化
+deno task fmt
+
+# 代码检查
+deno task lint
+
+# 缓存管理
+deno task manage-cache
+```
+
+## 📁 项目结构
+
+```
+pxve-api/
+├── src/
+│   ├── app.ts             # 应用入口
+│   ├── middlewares/       # 中间件
+│   ├── routes/            # 路由定义
+│   ├── services/          # 业务逻辑
+│   └── lib/               # 工具库
+├── scripts/               # 脚本工具
+├── public/                # 静态资源
+├── .env.example           # 环境变量模板
+├── deno.json              # Deno 配置
+├── Dockerfile             # Docker 配置
+└── README.md              # 项目说明
+```
+
+## 🔧 技术栈
+
+- **运行时**: Deno
+- **框架**: Hono
+- **API 文档**: Swagger UI + Scalar
+- **图片处理**: Sharp
+- **HTML 解析**: Cheerio
+- **数据验证**: Zod
+- **类型安全**: TypeScript
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 🔗 相关项目
+
+- [Pixiv Viewer](https://github.com/asadahimeka/pixiv-viewer) - 前端应用
+- [HibiAPI](https://github.com/mixmoe/HibiAPI) - 参考的 API 实现
+
+## ⚠️ 注意事项
+
+1. 请遵守 Pixiv 的使用条款和相关法律法规
+2. 合理使用 API，避免过于频繁的请求
+3. 部分功能需要相应的 API Key 或 Token
+4. 建议在生产环境中启用缓存以提高性能
+
+## 📄 许可证
+
+MIT License
+
+![pxve-api](https://count.nanoka.top/@pxveapigh)

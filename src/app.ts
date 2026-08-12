@@ -3,12 +3,11 @@ import { cors } from 'hono/cors'
 import { etag } from 'hono/etag'
 import { prettyJSON } from 'hono/pretty-json'
 import { secureHeaders } from 'hono/secure-headers'
-import { serveStatic } from 'hono/deno'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { createOpenApiDocument } from 'hono-zod-openapi'
 import { Scalar } from '@scalar/hono-api-reference'
 import { swaggerUI } from '@hono/swagger-ui'
 
-import { RequestDeduper } from '@lib/request-deduper.ts'
 import { logger } from './middlewares/logger.ts'
 import { blocker } from './middlewares/blocker.ts'
 import { cache } from './middlewares/cache.ts'
@@ -23,7 +22,7 @@ app.use(blocker())
 app.get('*', etag())
 app.use(prettyJSON())
 
-if (!Deno.args.includes('--dev') && Deno.env.get('ENABLE_CACHE') == '1') {
+if (process.env.ENABLE_CACHE == '1') {
   app.get(
     '*',
     cache({
@@ -84,10 +83,5 @@ app.onError((err, c) => {
   return c.json({ error: err?.message || 'Internal Server Error' }, 500)
 })
 
-const deduper = new RequestDeduper()
-const port = Number(Deno.env.get('PORT') ?? 3021)
-Deno.serve({ hostname: '0.0.0.0', port }, (req, ...args) =>
-  deduper.run(req.url, async () => await app.fetch(req, ...args))
-)
-
 export { app }
+export default app

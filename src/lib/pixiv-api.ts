@@ -65,7 +65,9 @@ async function callApi(url: string, options: Record<string, any> = {}) {
   throw error
 }
 
-const loginLock = new AwaitLock.default()
+// await-lock 2.x 是 __esModule CJS：类挂在模块 namespace 的 .default 上（Deno 与 Node/tsx interop 行为一致）
+const AwaitLockCtor = (AwaitLock as any).default ?? AwaitLock
+const loginLock = new AwaitLockCtor()
 
 class PixivApi {
   token = PIXIV_ACCOUNT_TOKEN

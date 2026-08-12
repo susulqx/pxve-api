@@ -1,10 +1,10 @@
-import { join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
 
 const execFileAsync = promisify(execFile)
 
-const fetch_x_media_py = join(import.meta.dirname!, 'fetch_x_media.py')
+const fetch_x_media_py = fileURLToPath(new URL('./fetch_x_media.py', import.meta.url))
 export async function runFetchXMediaCmd(userName?: string, userId?: string, nextCursor?: string) {
   if (!userName && !userId) {
     throw new Error('`userName` or `userId` is required.')

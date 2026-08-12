@@ -1,4 +1,8 @@
 import { join } from 'node:path'
+import { execFile } from 'node:child_process'
+import { promisify } from 'node:util'
+
+const execFileAsync = promisify(execFile)
 
 const fetch_x_media_py = join(import.meta.dirname!, 'fetch_x_media.py')
 export async function runFetchXMediaCmd(userName?: string, userId?: string, nextCursor?: string) {
@@ -17,15 +21,16 @@ export async function runFetchXMediaCmd(userName?: string, userId?: string, next
     .flat()
     .filter(Boolean) as string[]
 
-  const command = new Deno.Command('python', { args: [fetch_x_media_py, ...args] })
-
-  const { success, stderr, stdout } = await command.output()
-  const decoder = new TextDecoder()
-  if (!success) {
-    console.error('Run fetch_x_media cmd failed:', decoder.decode(stderr))
+  // Node.js port of the original Deno.Command('python', ...) invocation.
+  // Same command, same arguments, same error message on failure.
+  try {
+    const { stdout, stderr } = await execFileAsync('python', [fetch_x_media_py, ...args])
+    if (stderr) {
+      console.error('Run fetch_x_media cmd stderr:', stderr)
+    }
+    return JSON.parse(stdout)
+  } catch (error) {
+    console.error('Run fetch_x_media cmd failed:', error)
     throw new Error('Run fetch_x_media cmd failed')
   }
-
-  const res = decoder.decode(stdout)
-  return JSON.parse(res)
 }

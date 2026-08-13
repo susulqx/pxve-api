@@ -1,4 +1,4 @@
-import { UA_HEADER } from '@lib/const.ts'
+import { UA_HEADER } from '../lib/const.ts'
 import { callPixivAction } from './pixiv/action.ts'
 import { pixivWebApi } from './pixiv/web-api.ts'
 import { recoverPidImage } from './pixiv/pid-recover.ts'

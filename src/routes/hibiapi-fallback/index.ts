@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { openApi } from 'hono-zod-openapi'
 import z from 'zod'
-import { HIBIAPI_BASE, UA_HEADER } from '@lib/const.ts'
+import { HIBIAPI_BASE, UA_HEADER } from '../../lib/const.ts'
 
 export const hibiapiFallbackRoute = new Hono().on(
   'GET',

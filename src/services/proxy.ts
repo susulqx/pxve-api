@@ -1,4 +1,4 @@
-import { PIXIV_COOKIE } from '@lib/const.ts'
+import { PIXIV_COOKIE } from '../lib/const.ts'
 
 export async function commonProxy(req: Request) {
   const url = new URL(req.url)

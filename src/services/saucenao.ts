@@ -1,4 +1,4 @@
-import { SAUCENAO_API_KEY, UA_HEADER } from '@lib/const.ts'
+import { SAUCENAO_API_KEY, UA_HEADER } from '../lib/const.ts'
 
 export async function saucenaoSearch(file: string | Blob) {
   if (!SAUCENAO_API_KEY) throw new Error('SAUCENAO_API_KEY is not set')

@@ -12,7 +12,7 @@
  */
 import { serve } from '@hono/node-server'
 import { app } from './app.ts'
-import { RequestDeduper } from '@lib/request-deduper.ts'
+import { RequestDeduper } from './lib/request-deduper.ts'
 
 const port = Number(process.env.PORT ?? 3021)
 const deduper = new RequestDeduper()

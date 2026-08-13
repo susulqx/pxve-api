@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { execFile } from 'node:child_process'
 import { promisify } from 'node:util'
-import { UA_HEADER } from '@lib/const.ts'
+import { UA_HEADER } from '../lib/const.ts'
 import { pixivWebApi } from './pixiv/web-api.ts'
 
 const execFileAsync = promisify(execFile)

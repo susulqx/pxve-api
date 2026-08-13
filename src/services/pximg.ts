@@ -1,7 +1,7 @@
-import { UA_HEADER } from '../lib/const.ts'
-import { callPixivAction } from './pixiv/action.ts'
-import { pixivWebApi } from './pixiv/web-api.ts'
-import { recoverPidImage } from './pixiv/pid-recover.ts'
+import { UA_HEADER } from '../lib/const.js'
+import { callPixivAction } from './pixiv/action.js'
+import { pixivWebApi } from './pixiv/web-api.js'
+import { recoverPidImage } from './pixiv/pid-recover.js'
 
 export async function fetchPximg(path: string) {
   const resp = await fetch(`https://i.pximg.net${path}`, {

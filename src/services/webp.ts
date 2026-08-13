@@ -1,5 +1,5 @@
 import sharp from 'sharp'
-import { UA_HEADER } from '../lib/const.ts'
+import { UA_HEADER } from '../lib/const.js'
 
 /**
  * Node.js port of the original Deno Web Worker logic (src/services/worker/webp-worker.ts).

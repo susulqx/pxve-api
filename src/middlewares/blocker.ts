@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'hono'
 import { isbot } from 'isbot'
-import { ACCEPT_DOMAINS, UA_BLACKLIST } from '../lib/const.ts'
+import { ACCEPT_DOMAINS, UA_BLACKLIST } from '../lib/const.js'
 
 function isAccepted(path: string, ua?: string, origin?: string, referer?: string): boolean {
   if (path === '/favicon.ico' || path === '/robots.txt') return true

@@ -1,6 +1,6 @@
 import { load, type CheerioAPI, type Cheerio } from 'cheerio'
-import { UA_HEADER } from '../lib/const.ts'
-import { objectToQueryString } from './pixiv/pixiv-now.ts'
+import { UA_HEADER } from '../lib/const.js'
+import { objectToQueryString } from './pixiv/pixiv-now.js'
 
 const languages = ['en', 'zh-tw', 'zh', 'ko', 'th', 'ms', 'ja']
 const getLang = (lang: string) => languages.find(e => lang.toLowerCase().includes(e)) || 'en'

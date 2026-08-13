@@ -1,8 +1,8 @@
 import { translate as msTranslate } from 'microsoft-translate-api'
 import { translate as ggTranslate } from 'google-translate-api-x'
-import { translate as ydTranslate } from '../youdao.ts'
-import { SILICONClOUD_APT_KEY } from '../../lib/const.ts'
-import { pixivWebApi } from './web-api.ts'
+import { translate as ydTranslate } from '../youdao.js'
+import { SILICONClOUD_APT_KEY } from '../../lib/const.js'
+import { pixivWebApi } from './web-api.js'
 
 export async function translatePixivNovel(id: string, query: Record<string, string>) {
   id = id.replace('.html', '')

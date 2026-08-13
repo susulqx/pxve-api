@@ -1,4 +1,4 @@
-import { UA_HEADER } from '../lib/const.ts'
+import { UA_HEADER } from '../lib/const.js'
 
 export async function illuminartyImageAnalysis(url: string) {
   const file = await fetch(url).then(r => r.blob())

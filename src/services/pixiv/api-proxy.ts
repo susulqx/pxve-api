@@ -1,4 +1,4 @@
-import { PIXIV_API_HEADERS } from '../../lib/const.ts'
+import { PIXIV_API_HEADERS } from '../../lib/const.js'
 
 export async function pixivApiProxy(reqUrl: string, req: Request) {
   const url = new URL(reqUrl)

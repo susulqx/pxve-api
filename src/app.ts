@@ -8,10 +8,10 @@ import { createOpenApiDocument } from 'hono-zod-openapi'
 import { Scalar } from '@scalar/hono-api-reference'
 import { swaggerUI } from '@hono/swagger-ui'
 
-import { logger } from './middlewares/logger.ts'
-import { blocker } from './middlewares/blocker.ts'
-import { cache } from './middlewares/cache.ts'
-import { routes } from './routes/index.ts'
+import { logger } from './middlewares/logger.js'
+import { blocker } from './middlewares/blocker.js'
+import { cache } from './middlewares/cache.js'
+import { routes } from './routes/index.js'
 
 const app = new Hono()
 

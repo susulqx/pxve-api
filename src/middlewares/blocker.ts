@@ -2,49 +2,39 @@ import type { MiddlewareHandler } from 'hono'
 import { isBot } from '../lib/ua-detector.js'
 import { ACCEPT_DOMAINS, UA_BLACKLIST } from '../lib/const.js'
 
-function isAccepted(path: string, ua?: string, origin?: string, referer?: string): boolean {
+/**
+ * 请求准入判定（blocker 核心逻辑）。
+ *
+ * 判定顺序：
+ *   1. 静态路径（favicon/robots）直接放行
+ *   2. 无 UA → 拒绝
+ *   3. Uptime 监控 UA → 放行
+ *   4. UA 机器人检测（isbot / aua，见 ua-detector.ts）→ 拒绝
+ *   5. UA_BLACKLIST 关键词 → 拒绝
+ *   6. Origin / Referer 域名白名单（ACCEPT_DOMAINS）→ 拒绝
+ */
+const isAccepted = (
+  path: string,
+  ua?: string,
+  origin?: string,
+  referer?: string
+): boolean => {
   if (path === '/favicon.ico' || path === '/robots.txt') return true
 
-  if (!ua) {
-    console.log('[blocker-diag] blocked=no-ua', path)
-    return false
-  }
+  if (!ua) return false
   if (ua.includes('Uptime')) return true
 
-  if (isBot(ua)) {
-    console.log('[blocker-diag] blocked=isbot', JSON.stringify({ path, ua }))
+  if (isBot(ua)) return false
+
+  const uaLower = ua.toLowerCase()
+  if (UA_BLACKLIST.some(keyword => uaLower.includes(keyword.toLowerCase()))) {
     return false
   }
 
-  ua = ua.toLowerCase()
-  const hit = UA_BLACKLIST.find(e => ua.includes(e.toLowerCase()))
-  if (hit) {
-    console.log(
-      '[blocker-diag] blocked=ua-blacklist',
-      JSON.stringify({ path, hit, UA_BLACKLIST, env: process.env.UA_BLACKLIST })
-    )
-    return false
-  }
+  const originOk = !origin || !ACCEPT_DOMAINS.length || ACCEPT_DOMAINS.some(domain => origin.includes(domain))
+  const refererOk = !referer || !ACCEPT_DOMAINS.length || ACCEPT_DOMAINS.some(domain => referer.includes(domain))
 
-  let originOk = false
-  if (!origin || !ACCEPT_DOMAINS.length || ACCEPT_DOMAINS.some(e => origin.includes(e))) {
-    originOk = true
-  }
-
-  let refererOk = false
-  if (!referer || !ACCEPT_DOMAINS.length || ACCEPT_DOMAINS.some(e => referer.includes(e))) {
-    refererOk = true
-  }
-
-  if (!originOk || !refererOk) {
-    console.log(
-      '[blocker-diag] blocked=domain',
-      JSON.stringify({ path, origin, referer, originOk, refererOk, ACCEPT_DOMAINS, env: process.env.ACCEPT_DOMAINS })
-    )
-    return false
-  }
-
-  return true
+  return originOk && refererOk
 }
 
 export function blocker(): MiddlewareHandler {

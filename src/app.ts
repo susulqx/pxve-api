@@ -7,15 +7,11 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { createOpenApiDocument } from 'hono-zod-openapi'
 import { Scalar } from '@scalar/hono-api-reference'
 import { swaggerUI } from '@hono/swagger-ui'
-import { inject } from '@vercel/analytics'
 
 import { logger } from './middlewares/logger.js'
 import { blocker } from './middlewares/blocker.js'
 import { cache } from './middlewares/cache.js'
 import { routes } from './routes/index.js'
-
-// Inject Vercel Analytics
-inject()
 
 const app = new Hono()
 

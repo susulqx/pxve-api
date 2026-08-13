@@ -79,6 +79,7 @@ docker run -d -p 3021:3021 --env-file .env pxve-api
 |---------|------|
 | `ACCEPT_DOMAINS` | 请求来源域名白名单（逗号分隔） |
 | `UA_BLACKLIST` | User-Agent 黑名单（逗号分隔） |
+| `USER_AGENT_DETECTOR` | User-Agent 机器人检测方案：`aua`（默认，@arraypress/user-agent）/ `isbot`（isbot）/ `no`（关闭）。非法值自动告警并降级为 `aua`；`no` 时仅保留上方 `UA_BLACKLIST`/`ACCEPT_DOMAINS` 防护 |
 
 ### Pixiv 配置
 

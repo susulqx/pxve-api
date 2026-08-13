@@ -1,5 +1,5 @@
 import type { MiddlewareHandler } from 'hono'
-import { isbot } from 'isbot'
+import { isBot } from '../lib/ua-detector.js'
 import { ACCEPT_DOMAINS, UA_BLACKLIST } from '../lib/const.js'
 
 function isAccepted(path: string, ua?: string, origin?: string, referer?: string): boolean {
@@ -8,7 +8,7 @@ function isAccepted(path: string, ua?: string, origin?: string, referer?: string
   if (!ua) return false
   if (ua.includes('Uptime')) return true
 
-  if (isbot(ua)) return false
+  if (isBot(ua)) return false
 
   ua = ua.toLowerCase()
   if (UA_BLACKLIST.some(e => ua.includes(e.toLowerCase()))) {

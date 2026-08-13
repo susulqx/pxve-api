@@ -4,5 +4,8 @@
     "src/app.ts": {
       "maxDuration": 300
     }
+  },
+  "env": {
+    "VERCEL_FORCE_NO_BUILD_CACHE": "1"
   }
 }

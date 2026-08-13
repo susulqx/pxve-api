@@ -5,24 +5,13 @@ import { ACCEPT_DOMAINS, UA_BLACKLIST } from '../lib/const.js'
 function isAccepted(path: string, ua?: string, origin?: string, referer?: string): boolean {
   if (path === '/favicon.ico' || path === '/robots.txt') return true
 
-  if (!ua) {
-    console.log('[blocker-diag] blocked=no-ua', path)
-    return false
-  }
+  if (!ua) return false
   if (ua.includes('Uptime')) return true
 
-  if (isbot(ua)) {
-    console.log('[blocker-diag] blocked=isbot', JSON.stringify({ path, ua }))
-    return false
-  }
+  if (isbot(ua)) return false
 
   ua = ua.toLowerCase()
-  const hit = UA_BLACKLIST.find(e => ua.includes(e.toLowerCase()))
-  if (hit) {
-    console.log(
-      '[blocker-diag] blocked=ua-blacklist',
-      JSON.stringify({ path, hit, UA_BLACKLIST, env: process.env.UA_BLACKLIST })
-    )
+  if (UA_BLACKLIST.some(e => ua.includes(e.toLowerCase()))) {
     return false
   }
 
@@ -36,15 +25,7 @@ function isAccepted(path: string, ua?: string, origin?: string, referer?: string
     refererOk = true
   }
 
-  if (!originOk || !refererOk) {
-    console.log(
-      '[blocker-diag] blocked=domain',
-      JSON.stringify({ path, origin, referer, originOk, refererOk, ACCEPT_DOMAINS, env: process.env.ACCEPT_DOMAINS })
-    )
-    return false
-  }
-
-  return true
+  return originOk && refererOk
 }
 
 export function blocker(): MiddlewareHandler {

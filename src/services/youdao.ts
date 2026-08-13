@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js'
+import { createHash, createDecipheriv } from 'node:crypto'
 import { UA_HEADER } from '../lib/const.js'
 
 const SECRET_KEY = 'SRz6r3IGA6lj9i5zW0OYqgVZOtLDQe3E'
@@ -6,17 +6,13 @@ const AES_KEY = 'ydsecret://query/key/B*RGygVywfNBwpmBaZg*WT7SIOUP2T0C9WHMZN39j^
 const AES_IV = 'ydsecret://query/iv/C@lZe2YzHtZ2CYgaXKSVfsb7Y4QWHjITPPZ0nQp87fBeJ!Iv6v^6fvi2WN@bYpJ4'
 
 function decryptResult(result: string) {
-  const key = CryptoJS.MD5(AES_KEY)
-  const iv = CryptoJS.MD5(AES_IV)
-  const cipher = CryptoJS.enc.Base64.parse(result.replace(/-/g, '+').replace(/_/g, '/')).toString(CryptoJS.enc.Base64)
+  const key = createHash('md5').update(AES_KEY).digest()
+  const iv = createHash('md5').update(AES_IV).digest()
+  const cipher = Buffer.from(result.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('base64')
 
-  const decrypted = CryptoJS.AES.decrypt(cipher, key, {
-    iv,
-    mode: CryptoJS.mode.CBC,
-    padding: CryptoJS.pad.Pkcs7,
-  })
-
-  const decryptedText = decrypted.toString(CryptoJS.enc.Utf8)
+  const decipher = createDecipheriv('aes-128-cbc', key, iv)
+  decipher.setAutoPadding(true)
+  const decryptedText = Buffer.concat([decipher.update(cipher, 'base64'), decipher.final()]).toString('utf8')
   return JSON.parse(decryptedText.trim())
 }
 
@@ -25,9 +21,9 @@ export async function translate(text: string, from = 'ja', to = 'zh-CHS') {
 
   const mysticTime = Date.now().toString()
 
-  const sign = CryptoJS.MD5(`client=fanyideskweb&mysticTime=${mysticTime}&product=webfanyi&key=${SECRET_KEY}`).toString(
-    CryptoJS.enc.Hex
-  )
+  const sign = createHash('md5')
+    .update(`client=fanyideskweb&mysticTime=${mysticTime}&product=webfanyi&key=${SECRET_KEY}`)
+    .digest('hex')
 
   const headers = {
     'accept': 'application/json, text/plain, */*',

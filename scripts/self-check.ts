@@ -3,7 +3,7 @@
  *
  * 验证内容：
  * 1. 全部业务模块可在 Node.js 下顶层加载（无 Deno 依赖、无顶层副作用异常）
- * 2. crypto-js MD5 等运行时调用可用
+ * 2. node:crypto MD5 等运行时调用可用
  *
  * 用法：npm run self-check
  */
@@ -61,15 +61,15 @@ for (const m of modules) {
   }
 }
 
-// crypto-js 运行时冒烟（Pixiv 签名 / 有道解密依赖）
+// node:crypto 运行时冒烟（Pixiv 签名 / 有道解密依赖；原 crypto-js 已替换）
 try {
-  const { default: CryptoJS } = await import('crypto-js')
-  const md5 = CryptoJS.MD5('test').toString()
+  const { createHash } = await import('node:crypto')
+  const md5 = createHash('md5').update('test').digest('hex')
   if (md5 !== '098f6bcd4621d373cade4e832627b4f6') throw new Error('md5 mismatch')
-  console.log('OK   crypto-js MD5 runtime check')
+  console.log('OK   node:crypto MD5 runtime check')
 } catch (e) {
   fail++
-  console.log('FAIL crypto-js MD5 runtime check ->', (e as Error).message)
+  console.log('FAIL node:crypto MD5 runtime check ->', (e as Error).message)
 }
 
 console.log(fail === 0 ? '\n✅ 全部模块加载与运行时自检通过' : `\n❌ ${fail} 项失败`)

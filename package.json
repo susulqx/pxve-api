@@ -23,7 +23,6 @@
     "await-lock": "^2.2.2",
     "cheerio": "^1.1.2",
     "cookie": "^1.1.1",
-    "crypto-js": "^4.2.0",
     "dayjs": "^1.11.19",
     "google-translate-api-x": "^10.7.2",
     "hono": "^4.12.2",
@@ -34,8 +33,10 @@
     "sharp": "^0.34.5",
     "zod": "^4.3.5"
   },
+  "overrides": {
+    "encoding-sniffer": "1.0.2"
+  },
   "devDependencies": {
-    "@types/crypto-js": "^4.2.2",
     "@types/node": "^22.10.0",
     "@types/qs": "^6.15.1",
     "esbuild": "^0.24.0",

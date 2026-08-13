@@ -25,15 +25,14 @@ SOFTWARE.
 */
 
 import AwaitLock from 'await-lock'
-// @ts-types="npm:@types/crypto-js"
-import CryptoJS from 'crypto-js'
+import { createHash } from 'node:crypto'
 // @ts-types="npm:@types/qs"
 import qs from 'qs'
 import dayjs from 'dayjs'
 import { memdb } from './db-memory.js'
 import { PIXIV_ACCOUNT_TOKEN, PIXIV_ACCOUNT_TOKEN_ALTS, PIXIV_API_HEADERS } from './const.js'
 
-const md5 = (s: string) => CryptoJS.MD5(s).toString()
+const md5 = (s: string) => createHash('md5').update(s).digest('hex')
 
 const BASE_URL = 'https://app-api.pixiv.net'
 const OAUTH_URL = 'https://oauth.secure.pixiv.net'

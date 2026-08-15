@@ -70,7 +70,13 @@ export async function request({
     config.headers.cookie = headers['x-auth']
   }
 
-  const resp = await fetch(reqUrl, config)
+  const resp = await fetch(reqUrl, {
+    ...config,
+    // 转发流式 body（POST）时 Node/Deno fetch 要求显式 duplex，否则报
+    // "RequestInit: duplex option is required when sending a body."
+    duplex: 'half',
+    // RequestInit 类型未包含 duplex（运行时必需），用断言绕过类型限制
+  } as RequestInit)
   if (!resp.ok) {
     throw new Error('Response not ok.')
   }

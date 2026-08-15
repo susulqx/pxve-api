@@ -25,7 +25,11 @@ export async function pixivApiProxy(reqUrl: string, req: Request) {
     method: req.method,
     body: req.body,
     headers,
-  })
+    // 转发流式 body（POST 如发评论）时，Node/Deno fetch 要求显式声明 duplex
+    // 否则报 "RequestInit: duplex option is required when sending a body."
+    duplex: 'half',
+    // RequestInit 类型未包含 duplex（运行时必需），用断言绕过类型限制
+  } as RequestInit)
 
   return resp
 }

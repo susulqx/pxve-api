@@ -22,7 +22,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "functions": {
-    "src/app.ts": { "maxDuration": 300, "memory": 2048 }
+    "src/app.ts": { "maxDuration": 300 }
   }
 }
 ```

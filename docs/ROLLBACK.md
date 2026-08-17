@@ -82,7 +82,7 @@ main  (ac390fb, tag v1.0-deno-original)  ← 未动，随时可切回
 
 | 场景 | 操作 |
 |---|---|
-| Node 版启动失败 | ① `netstat -ano \| grep :3021` 找到 PID → `taskkill //F //PID <pid>`；② 检查 `npm run type-check` / `npm run self-check`；③ 若为代码问题，按 1.1 回滚 |
+| Node 版启动失败 | ① `netstat -ano \| grep :3021` 找到 PID → `taskkill //F //PID <pid>`；② 检查 `npm run type-check`；③ 若为代码问题，按 1.1 回滚 |
 | 依赖损坏 | 删除 `node_modules/` 与 `package-lock.json`，重新 `npm install`（不触碰 src） |
 | 端口冲突 | 确认旧服务已停（多实例并存时会 EADDRINUSE） |
 

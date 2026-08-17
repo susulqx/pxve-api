@@ -41,3 +41,6 @@ src/services/x-media/cookies.json
 
 # workbuddy workspace data
 .workbuddy/
+
+# arch-opt workspace artifacts (lean baseline / plans)
+/arch-opt-workspace/

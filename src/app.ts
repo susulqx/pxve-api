@@ -55,13 +55,8 @@ Partially compatible with HibiAPI.
 - [Scalar](/docs) (Easier to read and more beautiful)
 - [Swagger UI](/swagger) (Integrated interactive testing function)
 
-*HibiAPI Documents* :
-- [Scalar](/docs/hibiapi) (Easier to read and more beautiful)
-- [Swagger UI](/swagger/hibiapi) (Integrated interactive testing function)
-
 *Project* :
 - [asadahimeka/pxve-api](https://github.com/asadahimeka/pxve-api)
-- [mixmoe/HibiAPI](https://github.com/mixmoe/HibiAPI)
 `.trim()
 
 createOpenApiDocument(
@@ -71,11 +66,8 @@ createOpenApiDocument(
 )
 
 const cdn = 'https://fastly.jsdelivr.net/npm/@scalar/api-reference@1.43.11/dist/browser/standalone.js'
-app.get('/openapi-hibiapi.json', serveStatic({ path: './public/openapi-hibiapi.json' }))
 app.get('/docs', Scalar({ url: '/openapi.json', theme: 'elysiajs', pageTitle: 'Pxve API', cdn }))
-app.get('/docs/hibiapi', Scalar({ url: '/openapi-hibiapi.json', theme: 'purple', pageTitle: 'HibiAPI', cdn }))
 app.get('/swagger', swaggerUI({ url: '/openapi.json' }))
-app.get('/swagger/hibiapi', swaggerUI({ url: '/openapi-hibiapi.json' }))
 
 app.notFound(c => c.json({ error: 'Not Found' }, 404))
 app.onError((err, c) => {

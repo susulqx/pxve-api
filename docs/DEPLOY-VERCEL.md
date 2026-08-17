@@ -1,6 +1,6 @@
 # pxve-api 部署步骤（Vercel，Node.js 运行时）
 
-> 前置：本仓库已完成 Node.js 化（`feat/vercel-migration`，HEAD=f169375）。本文件只描述"部署"，不涉及代码改造。
+> 前置：本仓库为官方 pxve-api 的**精简版**（LEAN 迁移，基线 `lean-baseline-6085363`），仅保留 `/pixiv-app-api/*`、`/pixiv-oauth/*` 透传 + `/` 首页 + `/docs` 文档；完整功能见上游仓库。
 > 平台注意：必须使用 **Node.js 运行时**（默认/Fluid），不要选 Edge 运行时（Edge 无 child_process/fs/原生模块）。
 
 ---
@@ -29,28 +29,23 @@
 
 > - ⚠️ `functions.runtime` 只接受运行时包标识（如 `@vercel/node@3.x`），**不要写 `nodejs20.x`**（会报 "Function Runtimes must have a valid version"）；`nodeVersion` 也不是 vercel.json 的字段（会报 "should NOT have additional property"）。
 > - **Node 版本在 Dashboard → Project → Settings → General → Node.js Version 里选择（建议 20.x 或 22.x）**，不写在配置文件中。
-> - `maxDuration`：Hobby 上限 300s（ugoira 转码/长文翻译预留）；Pro 可 800s。
-> - 若本机 ffmpeg 未装导致 ugoira 失败：部署前安装 `ffmpeg-static` 并把 `src/services/ugoira.ts` 的 `execFile('ffmpeg', …)` 改为 `execFile(ffmpegPath, …)`（ffmpeg-static 导出二进制路径），bundle 会增大约 76MB（Vercel 250MB 限内）。
+> - `maxDuration`：Hobby 上限 300s；透传链路为流式 fetch，通常远低于上限。
 
 ### 2.2 环境变量（Dashboard → Settings → Environment Variables）
 
 | 变量 | 类型 | 必填 | 说明 |
 |---|---|---|---|
-| `PIXIV_ACCOUNT_TOKEN` | **Secret** | 推荐 | Pixiv App API Refresh Token |
-| `PIXIV_COOKIE` | **Secret** | 推荐 | Pixiv Web API Cookie |
-| `PIXIV_ACCOUNT_TOKEN_ALTS` | Secret | 可选 | 备用 tokens（逗号分隔） |
-| `SAUCENAO_API_KEY` | Secret | 可选 | 以图搜图 |
-| `SILICONClOUD_APT_KEY` | Secret | 可选 | 小说 AI 翻译 |
-| `ACCEPT_DOMAINS` | 变量 | 可选 | 请求来源白名单（逗号分隔） |
-| `UA_BLACKLIST` | 变量 | 可选 | UA 黑名单（逗号分隔） |
-| `HIBIAPI_BASE` | 变量 | 可选 | 非 Pixiv 部分兜底服务 |
+| `ACCEPT_DOMAINS` | 变量 | 可选 | 请求来源白名单（逗号分隔），留空=不限制 |
+| `UA_BLACKLIST` | 变量 | 可选 | UA 黑名单（逗号分隔），留空=不限制 |
+| `USER_AGENT_DETECTOR` | 变量 | 可选 | UA 机器人检测方案：`aua`（默认）/ `isbot` / `no` |
 | `ENABLE_CACHE` | 变量 | 建议 `0` | Node 无 Cache API，`1` 时中间件自动降级不缓存 |
+
+> 精简版为纯透传链路，不读取 `PIXIV_COOKIE` / `PIXIV_ACCOUNT_TOKEN` 等服务端凭据（客户端自带 `Authorization`），无需配置。
 
 ### 2.3 部署命令
 
 ```bash
-cd "D:/Program Files/.su/pxve-api"
-git checkout feat/vercel-migration        # 确保在迁移分支
+cd "D:/Program Files/.su/pxve-api-vercel"
 npm ci                                     # 安装锁定依赖
 vercel deploy --prod                       # 生产部署
 vercel logs                                # 查看运行时日志
@@ -75,26 +70,30 @@ vercel logs                                # 查看运行时日志
 
 ```bash
 curl -s https://<你的域名>/                          # Ciallo 首页
-curl -s https://<你的域名>/openapi.json | head -c 100
+curl -s https://<你的域名>/openapi.json | head -c 100   # 应仅含 /pixiv-app-api/* 与 /pixiv-oauth/*
 curl -s -o /dev/null -w "%{http_code}\n" https://<你的域名>/docs
-curl -s https://<你的域名>/api/pixiv/rank            # 有 token 时返回数据
-curl -s -I https://<你的域名>/pximg/...              # 图片流式透传
+curl -s -o /dev/null -w "%{http_code}\n" https://<你的域名>/swagger
+curl -s -o /dev/null -w "%{http_code}\n" https://<你的域名>/robots.txt
+curl -s -o /dev/null -w "%{http_code}\n" https://<你的域名>/favicon.ico
+curl -s https://<你的域名>/pixiv-app-api/v1/illust/recommended   # 带 Authorization 时返回 Pixiv 数据
+curl -s -o /dev/null -w "%{http_code}\n" https://<你的域名>/nope   # 404
 ```
 
-完整清单见 `docs/vercel-migration-plan.md` 第四节 + `docs/VERIFY.md`。
+完整清单见 `docs/VERIFY.md`。
 
 ## 5. 平台已知限制（部署前必读）
 
 | 限制 | 数值 | 对本项目影响 |
 |---|---|---|
-| 请求/响应体 | 4.5MB（流式响应除外） | pximg 大图、ugoira 产物必须**流式返回**（现有代理已流式透传；ugoira 改造时用 `fs.createReadStream`） |
-| 最大时长 | 300s（Hobby）/ 800s（Pro） | ugoira 转码、超长小说翻译注意 `maxDuration` 配置 |
-| bundle 大小 | 250MB 未压缩 | 当前 3.68MB（含 ffmpeg-static 后约 80MB，仍充足） |
-| `/api/x/media` | 不可用 | 依赖 python+twikit 子进程，Vercel Node 函数无 python。**默认移除或 JS 重写**，否则该路由 500 |
+| 请求/响应体 | 4.5MB（流式响应除外） | 透传链路为流式 fetch 转发，大响应不受此限制 |
+| 最大时长 | 300s（Hobby）/ 800s（Pro） | 透传请求远低于上限，`maxDuration=300` 已足够 |
+| bundle 大小 | 250MB 未压缩 | 精简后 bundle 显著小于原 3.68MB |
 | 商用条款 | Hobby 非商业 | 面向公众服务建议 Pro |
+
+> 原版依赖 python 子进程 / ffmpeg / sharp 的功能（`/api/x/media`、`/api/ugoira`、`/api/webp` 等）已在精简版中移除，无平台兼容问题。
 
 ## 6. 回滚
 
 - 函数回滚：Dashboard → Deployments → 上一版本 → Redeploy（或 `vercel rollback`）。
 - DNS 回滚：CF 控制台改回原记录（TTL 60s）。
-- 完整说明见 `docs/ROLLBACK.md`。
+- 代码回滚：`git checkout lean-baseline-6085363 -- .` 可整体恢复精简前版本（完整说明见 `docs/ROLLBACK.md`）。

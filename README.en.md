@@ -1,6 +1,5 @@
 # Pxve API
 
-[![Deno](https://img.shields.io/badge/Deno-2-blue.svg)](https://deno.land/)
 [![Hono](https://img.shields.io/badge/Hono-E36002.svg?style=flat\&logo=Hono\&logoColor=white)](https://hono.dev/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
@@ -8,27 +7,24 @@ English | [中文](./README.md)
 
 A program that implements an easy-to-use API for Pixiv-related sites, used by [Pixiv Viewer](https://github.com/asadahimeka/pixiv-viewer).
 
+> **Slim note**: This repository is a **Vercel-slimmed** version of the official [pxve-api](https://github.com/asadahimeka/pxve-api) (Node.js + Hono), retaining only `/pixiv-app-api/*` and `/pixiv-oauth/*` passthrough plus the `/` homepage and `/docs` documentation. The full feature set (ugoira, webp conversion, novel translation, image search, etc.) lives in the upstream repository.
+
 Demo: [api.pxve.cc](https://api.pxve.cc)
 
 API Documentation: [api.pxve.cc/docs](https://api.pxve.cc/docs)
 
 ## ✨ Features
 
-* 🎨 **Pixiv API** - Supports Pixiv App API and Web API
-* 🔌 **HibiAPI Compatibility** - Pixiv endpoints are compatible with the [HibiAPI](https://github.com/mixmoe/HibiAPI) format
-* 🎬 **Animated Image Processing** - Ugoira animation conversion
-* 📚 **Novel Translation** - Pixiv novel translation support
-* 🖼️ **Image Processing** - WebP conversion, image proxy
-* 🔍 **Image Search** - Integrated SauceNAO API
-* 🔐 **Security Protection** - Rate limiting, domain whitelist, UA blacklist
-* 📖 **API Documentation** - Integrated Swagger UI and Scalar documentation
-* 🐳 **Docker Support** - Docker deployment provided
+* 🎨 **Pixiv App API Passthrough** - `/pixiv-app-api/*` and `/pixiv-oauth/*` forward directly to Pixiv official endpoints (host rewrite + header forwarding + streaming body)
+* 🔐 **Security Protection** - Origin domain whitelist, UA blacklist, UA bot detection
+* 📖 **API Documentation** - Integrated Swagger UI and Scalar docs (auto-generated from registered routes)
+* ☁️ **Vercel Deployment** - Zero-config Hono detection, Node.js runtime
 
 ## 🚀 Quick Start
 
 ### Requirements
 
-Deno 2.x
+Node.js ≥ 20.11 (22.x recommended)
 
 ### Installation & Running
 
@@ -39,33 +35,29 @@ git clone https://github.com/asadahimeka/pxve-api.git
 cd pxve-api
 ```
 
-2. **Configure environment variables**
+2. **Install dependencies**
+
+```bash
+npm install
+```
+
+3. **Configure environment variables** (optional)
 
 ```bash
 cp .env.example .env
-# Edit the .env file and fill in the required configuration
+# Edit the .env file as needed
 ```
 
-3. **Run in development mode**
+4. **Run in development mode**
 
 ```bash
-deno task dev
+npm run dev
 ```
 
-4. **Run in production mode**
+5. **Run in production mode**
 
 ```bash
-deno task start
-```
-
-### Docker Deployment
-
-```bash
-# Build image
-docker build -t pxve-api .
-
-# Run container
-docker run -d -p 3021:3021 --env-file .env pxve-api
+npm run start
 ```
 
 ## 📝 Configuration
@@ -74,31 +66,18 @@ docker run -d -p 3021:3021 --env-file .env pxve-api
 
 | Environment Variable | Description                    | Default |
 | -------------------- | ------------------------------ | ------- |
-| `PORT`               | Service listening port         | `3021`  |
-| `ENABLE_CACHE`       | Enable GET request cache (1/0) | `0`     |
+| `PORT`               | Service listening port (local only; ignored on Vercel) | `3021`  |
+| `ENABLE_CACHE`       | Enable GET request cache (1/0); degrades gracefully on Vercel (no Cache API) | `0`     |
 
 ### Security Configuration
 
 | Environment Variable | Description                                       |
 | -------------------- | ------------------------------------------------- |
-| `ACCEPT_DOMAINS`     | Request origin domain whitelist (comma-separated) |
-| `UA_BLACKLIST`       | User-Agent blacklist (comma-separated)            |
+| `ACCEPT_DOMAINS`     | Request origin domain whitelist (comma-separated), empty = unrestricted |
+| `UA_BLACKLIST`       | User-Agent blacklist (comma-separated), empty = unrestricted |
+| `USER_AGENT_DETECTOR`| UA bot detection: `aua` (default) / `isbot` / `no` |
 
-### Pixiv Configuration
-
-| Environment Variable       | Description                             | Required    |
-| -------------------------- | --------------------------------------- | ----------- |
-| `PIXIV_COOKIE`             | Pixiv Web API Cookie                    | Recommended |
-| `PIXIV_ACCOUNT_TOKEN`      | Pixiv App API Refresh Token             | Recommended |
-| `PIXIV_ACCOUNT_TOKEN_ALTS` | Backup Refresh Tokens (comma-separated) | Optional    |
-
-### Third-party Service Configuration
-
-| Environment Variable   | Description                   | Usage             |
-| ---------------------- | ----------------------------- | ----------------- |
-| `HIBIAPI_BASE`         | Backup HibiAPI service domain | API forwarding    |
-| `SAUCENAO_API_KEY`     | SauceNAO API Key              | Image search      |
-| `SILICONClOUD_APT_KEY` | SiliconFlow API Key           | Novel translation |
+> The slim build is a pure passthrough; no Pixiv Cookie / Refresh Token configuration is required (clients send their own `Authorization` header).
 
 ## 📚 API Documentation
 
@@ -106,56 +85,30 @@ After starting the service, the API documentation can be accessed at:
 
 * **Scalar Docs (Recommended)**: [http://localhost:3021/docs](http://localhost:3021/docs)
 * **Swagger UI**: [http://localhost:3021/swagger](http://localhost:3021/swagger)
-* **HibiAPI Compatible Docs**: [http://localhost:3021/docs/hibiapi](http://localhost:3021/docs/hibiapi)
+* **OpenAPI JSON**: [http://localhost:3021/openapi.json](http://localhost:3021/openapi.json)
 
 ## 🔗 API Endpoints
 
-### Pixiv Related
-
-* `GET /api/pixiv/*` - Pixiv App API
-* `GET /api/pixivision` - Pixivision API
-* `GET /api/pixiv-now/http` - Pixiv Web API
-* `GET /api/pixiv-novel-translate` - Novel translation
-* `GET /pid` - Find Pixiv images by PID
-* `GET /api/pid-recover` - Find Pixiv image mirrors by PID
-
-### Media Processing
-
-* `GET /api/ugoira` - Ugoira animation processing
-* `GET /api/webp` - WebP conversion
-* `GET /pximg` - pximg image proxy
-
-### Third-party Integrations
-
-* `GET /api/sauce/` - Image search
-* `GET /api/ai-image-detect` - AI image detection
-* `GET /api/x/media` - Fetch X user media tweets, see [reference documentation](./src/services/x-media/README.md)
-
-### Other Endpoints
-
-* `GET /proxy/*` - CORS proxy
-* HibiAPI compatible endpoints
+* `GET /` - Homepage
+* `GET /pixiv-app-api/*` - Pixiv App API passthrough (recommended, ranking, search, illust, novel, user, bookmark, follow, comment, etc.)
+* `POST /pixiv-oauth/auth/token` - Pixiv OAuth passthrough
+* `GET /openapi.json`, `/docs`, `/swagger` - API documentation
+* `GET /robots.txt`, `/favicon.ico` - Static assets
 
 ## 🛠️ Development Commands
 
 ```bash
 # Development mode (hot reload)
-deno task dev
+npm run dev
 
 # Production mode
-deno task start
+npm run start
 
 # Type checking
-deno task type-check
+npm run type-check
 
-# Code formatting
-deno task fmt
-
-# Linting
-deno task lint
-
-# Cache management
-deno task manage-cache
+# Build (esbuild bundle → dist/app.mjs)
+npm run build
 ```
 
 ## 📁 Project Structure
@@ -163,27 +116,25 @@ deno task manage-cache
 ```
 pxve-api/
 ├── src/
-│   ├── app.ts             # Application entry
-│   ├── middlewares/       # Middlewares
-│   ├── routes/            # Route definitions
-│   ├── services/          # Business logic
+│   ├── app.ts             # Application entry (Vercel zero-config via export default)
+│   ├── local-server.ts    # Local dev server
+│   ├── middlewares/       # Middlewares (logger/blocker/cache)
+│   ├── routes/            # Route definitions (/ homepage + pixiv passthrough)
+│   ├── services/          # Business logic (pixiv passthrough core)
 │   └── lib/               # Utility libraries
-├── scripts/               # Script tools
 ├── public/                # Static assets
+├── docs/                  # Deploy/verify/rollback docs
 ├── .env.example           # Environment variable template
-├── deno.json              # Deno configuration
-├── Dockerfile             # Docker configuration
-└── README.md              # Project documentation
+└── vercel.json            # Vercel function config
 ```
 
 ## 🔧 Tech Stack
 
-* **Runtime**: Deno
+* **Runtime**: Node.js
 * **Framework**: Hono
-* **API Documentation**: Swagger UI + Scalar
-* **Image Processing**: Sharp
-* **HTML Parsing**: Cheerio
+* **API Documentation**: Swagger UI + Scalar + hono-zod-openapi
 * **Data Validation**: Zod
+* **Build**: esbuild
 * **Type Safety**: TypeScript
 
 ## 🤝 Contributing
@@ -193,14 +144,13 @@ Issues and Pull Requests are welcome!
 ## 🔗 Related Projects
 
 * [Pixiv Viewer](https://github.com/asadahimeka/pixiv-viewer) - Frontend application
-* [HibiAPI](https://github.com/mixmoe/HibiAPI) - Reference API implementation
+* [pxve-api upstream](https://github.com/asadahimeka/pxve-api) - Full-featured version
 
 ## ⚠️ Notes
 
 1. Please comply with Pixiv's terms of service and relevant laws and regulations
 2. Use the API responsibly and avoid excessive requests
-3. Some features require corresponding API Keys or Tokens
-4. It is recommended to enable caching in production environments to improve performance
+3. Credentials such as `Authorization` are supplied by the client; the server does not store any Pixiv credentials
 
 ## 📄 License
 

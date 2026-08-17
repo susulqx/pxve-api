@@ -1,8 +1,32 @@
-# pxve-api Node.js 化迁移：回滚操作说明
+# pxve-api 回滚操作说明
 
-> 目标：任何阶段出现问题时，可在**分钟级**恢复到上一稳定状态或原始 Deno 版本。
-> 前提：迁移全程在独立分支完成，`main` 分支从未改动；原版目录 `D:\Program Files\.su\pxve-api - 原` 为最终兜底。
-> **回滚全程无数据丢失风险**：本项目无持久化业务数据（token 缓存可自动重建）。
+> 目标：任何阶段出现问题时，可在**分钟级**恢复到上一稳定状态或原始版本。
+> 精简版基线：`lean-baseline-6085363`（LEAN 迁移前原始 HEAD），可在任何 LEAN 提交后整体回滚。
+> **回滚全程无数据丢失风险**：本项目无持久化业务数据（透传链路无状态）。
+
+---
+
+## 0. 精简版（LEAN）回滚
+
+LEAN 迁移（LEAN-00..05）每阶段一个独立 commit，可整体或单阶段回滚：
+
+| 场景 | 操作 |
+|---|---|
+| 整批回滚（恢复精简前） | `git checkout lean-baseline-6085363 -- .` 后 `npm ci`；或 `git reset --hard lean-baseline-6085363`（会丢弃后续 commit，慎用） |
+| 单阶段回滚 | `git revert <LEAN-阶段commit>`（若后续阶段已提交，revert 可能冲突，需按 LEAN-05→…→目标顺序处理） |
+| 线上回滚（Vercel） | Dashboard → Deployments → 上一版本 → **Redeploy / Rollback**；或 `vercel rollback`（秒级，对外无感知） |
+| 依赖损坏 | 删 `node_modules/` + `package-lock.json`，重新 `npm ci`（不触碰 src） |
+
+LEAN 提交地图（`feat/vercel-migration`）：
+
+| 阶段 | commit | 内容 |
+|---|---|---|
+| LEAN-00 | 基线 | tag `lean-baseline-6085363`；.gitignore 忽略 arch-opt-workspace |
+| LEAN-01 | — | 精简入口（routes/index.ts + app.ts） |
+| LEAN-02 | — | 删除 42 个剔除文件 |
+| LEAN-03 | — | 依赖修剪（17→8 deps） |
+| LEAN-04 | — | 文档/README/配置同步 |
+| LEAN-05 | — | 构建验证（无代码改动） |
 
 ---
 
